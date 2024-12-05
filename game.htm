@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+   <link href="ghosticon.png" rel="icon" type="img">
+   <title>Crossy Road</title>
+   <style>
+        body{
+            background-color: #d7d7d7;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .bgclip{
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+        }
+        .cloud{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(cloud.png);
+            opacity: 0.3;
+            background-size: cover;
+            z-index: 3;
+            animation: animate 120s linear infinite;
+        }
+        @keyframes animate{
+            0%{
+                background-position: 0px;
+            }100%{
+                background-position: 5440px;
+            }
+        }
+        .can {
+            position: absolute;
+            overflow: hidden;
+            height: 566.4px;
+            width: 846.444444444px;
+            border: 5px solid #000000;
+            overflow-y: scroll;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+        .can::-webkit-scrollbar {
+            width: 0px;
+        }
+        .coll {
+            position: relative;
+            padding: 1rem;
+            background-image: linear-gradient(180deg, rgb(62, 62, 62), rgb(103, 103, 103));
+            border-top: 5px double #cfcfcf;
+            color: #ffffff00;
+            height: 30px;
+            overflow: hidden;
+        }
+        .colr {
+            position: relative;
+            padding: 1rem;
+            background-image: linear-gradient(180deg, rgb(62, 62, 62), rgb(103, 103, 103));
+            border-top: 5px double #cfcfcf;
+            color: #ffffff00;
+            height: 30px;
+            overflow: hidden;
+        }
+        .cold {
+            position: relative;
+            padding: 1rem;
+            /* background-color: #5da340; */
+            background-image: linear-gradient(180deg, #5da340, rgb(96, 207, 59));
+            border-top: 5px double #cfcfcf;
+            color: #ffffff00;
+            height: 30px;
+        }
+        .car-image {
+            width: 60px;
+            height: 35px;
+            position: absolute;
+            top: 15px;
+            z-index: 1;
+        }
+        .character-image {
+            width: 28px;
+            height: 50px;
+            position: absolute;
+            top: 7px;
+        }
+        #Score{
+            font-family: "Press Start 2P";
+            margin-top: 50px;
+            color: #ffffff;
+        }
+        #over{
+            text-align: center;
+            color: #ffffff;
+            opacity: 80%;
+            position: absolute;
+            top: 50%;
+            left: 51%;
+            transform: translate(-50%,-80%);
+            z-index: 2;
+            font-size: 150px;
+            font-family: "Press Start 2P";
+            padding: 25px;
+        }
+        #res{
+            font-family: "Press Start 2P";
+            color: #ffffff;
+            opacity: 80%;
+            position: absolute;
+            top: 79%;
+            left: 51%;
+            transform: translate(-50%,-50%);
+            background: #00000000;
+            border: none;
+            font-size: 50px;
+            z-index: 3;
+        }
+        #res:hover{
+            /* color: #525252; */
+            opacity: 1;
+            cursor: pointer;
+            font-size: 52px;
+        }
+   </style>
+</head>
+<body>
+
+    <video autoplay loop muted plays-inline class="bgclip">
+        <source src="bg1.webm" type="video/webm">
+    </video>
+    <div class="cloud">
+
+    </div>
+    <audio id="bgm" controls loop autoplay style="display: none;">
+        <source src="gamebgm1.mp3" type="audio/mpeg" >
+    </audio>
+    <audio id="step" controls style="display: none;">
+        <source src="char move music.mp3" type="audio/mpeg">;
+    </audio>
+    <audio id="crash" controls style="display: none;">
+        <source src="crash.mp3" type="audio/mpeg">;
+    </audio>
+    <audio id="won" controls style="display: none;">
+        <source src="congrats.wav" type="audio/wav">;
+    </audio>
+
+    <script>
+        var aud = document.getElementById("bgm");
+        aud.volume = 0.5;
+        var step = document.getElementById("step");
+        step.volume = 1;
+    </script>
+   <center>
+        <h1 id="Score">Score: 0</h1>
+        <h1 id="over"></h1>
+       <div class="can" id="colContainer">
+
+       </div>
+   </center>
+   <button id="res" style="display: none;" onclick="reloadPage()">Restart</button>
+   <script>
+        function reloadPage(){
+            location.reload();
+        }
+   </script>
+ 
+   <script>
+    const colContainer = document.getElementById("colContainer");
+    const carImages = ["car11.png","car21.png","car31.png","car41.png"];
+    const minCars = 1;
+    const maxCars = 1;
+    const carWidth = 100;
+
+    for (let i = 0; i < 101; i++) {
+        var newCol = document.createElement("div");
+        if (i % 10 == 0) {
+            newCol.className = "cold";
+            newCol.textContent = i + 1;
+        } else {
+            let lane = Math.floor(Math.random() * 2);
+            newCol.textContent = i + 1;
+            if (lane === 0) {
+                newCol.className = "coll";
+            } else {
+                newCol.className = "colr";
+            }
+        }
+        colContainer.appendChild(newCol);
+    }
+    var objBot = document.getElementById("colContainer");
+    objBot.scrollTop = objBot.scrollHeight;
+    var gen = 5000;
+    function generateCollCarImages() {
+        const collDivs = document.querySelectorAll(".coll");
+        collDivs.forEach((col) => {
+            const numCars = Math.floor(Math.random() * (maxCars - minCars + 1)) + minCars;
+            // const dir = -2;
+            var ind = Number(col.textContent);
+            for (let j = 0; j < numCars; j++) {
+                const carImage = document.createElement("img");
+                carImage.src = carImages[Math.floor(Math.random() * carImages.length)];
+                carImage.className = "car-image";
+                let leftPosition;
+                do {
+                    leftPosition = Math.random() * 100; 
+                } while (carOverlap(col, leftPosition)); 
+                carImage.style.left = leftPosition + "%";
+                col.appendChild(carImage);
+                animateCollCar(carImage, carSpeedl(ind));    
+            }
+        });
+        setTimeout(generateCollCarImages, gen);
+    }
+
+    function carSpeedl(col){
+        if(col > 80){
+            return -2;
+        }else if(col > 60){
+            return -4;
+        }else if(col > 40){
+            return -6;
+        }else if(col > 20){
+            return -8;
+        }else{
+            return -10;
+        }
+    }
+
+    function generateColrCarImages() {
+        const colrDivs = document.querySelectorAll(".colr");
+        colrDivs.forEach((col) => {
+            const numCars = Math.floor(Math.random() * (maxCars - minCars + 1)) + minCars;
+            // const dir = 2; 
+            var ind = Number(col.textContent);
+            for (let j = 0; j < numCars; j++) {
+            const carImage = document.createElement("img");
+            carImage.style.transform = 'scaleX(-1)'; //flip image
+            carImage.src = carImages[Math.floor(Math.random() * carImages.length)];
+            carImage.className = "car-image";
+            let rightPosition;
+            do {
+                rightPosition = Math.random() * 100; 
+            } while (carOverlap(col, rightPosition)); 
+            carImage.style.left = rightPosition + "%";
+            col.appendChild(carImage);
+            animateColrCar(carImage, carSpeedr(ind)); 
+            }
+        });
+        setTimeout(generateColrCarImages, gen);
+    }
+
+    function carSpeedr(col){
+        if(col > 80){
+            return 2;
+        }else if(col > 60){
+            return 4;
+        }else if(col > 40){
+            return 6;
+        }else if(col > 20 ){
+            return 8;
+        }else{
+            return 10;
+        }
+    }
+
+    // to check if a car overlaps 
+    function carOverlap(col, position) {
+        const cars = col.querySelectorAll(".car-image");
+        for (const car of cars) {
+            const carPosition = parseFloat(car.style.left);
+            if (Math.abs(carPosition - position) < carWidth / 100) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function animateCollCar(carImage, speed) {
+        const colWidth = carImage.parentElement.offsetWidth;
+        const startPosition = (Math.random() * colWidth) + 800;
+        const carsIn = carImage.parentElement.querySelectorAll(".car-image");
+        carsIn.forEach((car) => {
+            const carRect = car.getBoundingClientRect();
+            const carThis = carImage.getBoundingClientRect();
+            if(car !== carImage){
+                if (
+                    carRect.left < carThis.right &&
+                    carRect.right > carThis.left &&
+                    carRect.top < carThis.bottom &&
+                    carRect.bottom > carThis.top
+                ) {
+                    carImage.remove();
+                    // document.write("hello");
+                }
+            }
+            
+        });
+        let position = startPosition;
+
+        function move() {
+            position += speed; 
+            carImage.style.left = position + (speed < 0 ? "px" : "%");
+            // collCheck();
+            if ((speed < 0 && position + carWidth > 0) || (speed > 0 && position < colWidth)) {
+                requestAnimationFrame(move);
+            } else {
+                carImage.remove(); 
+            }
+        }
+
+        requestAnimationFrame(move);
+    }
+
+    function animateColrCar(carImage, speed) {
+        const colWidth = carImage.parentElement.offsetWidth;
+        const startPosition = (Math.random() * colWidth) - 900;
+        const carsIn = carImage.parentElement.querySelectorAll(".car-image");
+        carsIn.forEach((car) => {
+            const carRect = car.getBoundingClientRect();
+            const carThis = carImage.getBoundingClientRect();
+            if(car !== carImage){
+                if (
+                    carRect.left < carThis.right &&
+                    carRect.right > carThis.left &&
+                    carRect.top < carThis.bottom &&
+                    carRect.bottom > carThis.top
+                ) {
+                    carImage.remove();
+                    // document.write("hello");
+                }
+            }
+        });
+        let position = startPosition;
+
+        function move() {
+            position += speed;
+            carImage.style.left = position + (speed > 0 ? "px" : "%");
+            // collCheck();
+            if ((speed > 0 && position - carWidth < colWidth) || (speed < 0 && position > -carWidth)) {
+                requestAnimationFrame(move);
+            } else {
+                carImage.remove();
+            }
+        }
+        requestAnimationFrame(move);
+    }
+
+    generateCollCarImages();
+    generateColrCarImages();
+
+    setInterval(() =>{
+        collCheck();
+    },50);
+
+    // Character
+    const colCount = 101;
+    const character = document.createElement("img");
+    var dead = false;
+    character.src = "charf.png";
+    character.className = "character-image";
+    colContainer.appendChild(character);
+    let characterPosition = colCount - 1; // Start in the last .cold div
+
+    // Automatically generate car images
+    function carGenSpeed(){
+        if(characterPosition > 82){
+            gen = 5000;
+        }else if(characterPosition > 62){
+           gen = 4000;
+        }else if(characterPosition > 42){
+            gen = 3000;
+        }else if(characterPosition > 22){
+            gen = 2000;
+        }else{
+            gen = 1500;
+        }
+    }
+
+    let targetCol = colContainer.children[characterPosition];
+    targetCol.appendChild(character);
+    function collCheck(){
+        let targetCol = colContainer.children[characterPosition];
+        const carsInCol = targetCol.querySelectorAll(".car-image");
+        carsInCol.forEach((car) => {
+            const carRect = car.getBoundingClientRect();
+            const characterRect = character.getBoundingClientRect();
+            if (
+                carRect.left < characterRect.right &&
+                carRect.right > characterRect.left &&
+                carRect.top < characterRect.bottom &&
+                carRect.bottom > characterRect.top
+            ) {
+                if(!dead){
+                    document.getElementById("over").innerHTML = "GAME OVER";
+                    res.style.display = "block";
+                    const crash = document.getElementById("crash");
+                    crash.play();
+                    dead = true;
+                    character.src = "ghost.png";
+                    character.style.zIndex = 3;
+                }
+            }
+        });
+    }
+    character.style.left = 50 +"%";
+    let charLeft = 50;
+    let canMove = true; // Control  movement
+
+    var canCol = 1;
+    var Score = document.getElementById("Score");
+    var num = 0;
+
+    function moveCharacter(direction) {
+    if (canMove) {
+        canMove = false; // Disable movement 
+
+        character.style.display = "none";
+
+        if (direction === "up" && characterPosition > 0) {
+            characterPosition -= 1;
+            if (canCol > 3) {
+                if(characterPosition > 3 && dead === false){
+                    const colContainer = document.getElementById("colContainer");
+                    const childHeight = colContainer.children[1].clientHeight;
+                    colContainer.removeChild(colContainer.lastChild);
+                }
+                colContainer.scrollTop = colContainer.scrollHeight;
+            } else {
+                canCol++;
+            }
+        } else if (direction === "down" && characterPosition < colCount - 1) {
+            if (canCol > 1 ) {
+                characterPosition += 1;
+                if(characterPosition > 4 && dead === false){
+                    canCol--;
+                }
+            }
+        } else if (direction === "left" && character.style.left > 1 + "px") {
+            charLeft -= 7;
+            character.style.left = charLeft + "%";
+            
+        } else if (direction === "right" && character.style.left < 780 + "px") {
+            charLeft += 7;
+            character.style.left = charLeft + "%";
+            
+        }
+        const targetCol = colContainer.children[characterPosition];
+        targetCol.appendChild(character);
+        character.style.display = "block";
+
+
+        const timeout = setTimeout(() => {
+            canMove = true; // Re-enable movement 
+            if(!dead){
+                var x = 100 - characterPosition;
+                if(x > num){
+                    num = x;
+                    Score.innerHTML = "Score: " + num;
+                }else{
+                    Score.innerHTML = "Score: " + num;
+                }
+                
+                carGenSpeed();
+                if(num === 100){
+                    document.getElementById("won").play();
+                    document.getElementById("over").innerHTML = "CONGRATS!";
+                    res.style.display = "block";
+                    canMove = false;
+                    clearTimeout(timeout);
+                }
+            }
+        }, 100);
+    }
+}
+
+    document.addEventListener("keydown", (event) => {
+        switch (event.key) {
+            case "w":
+            case "W":
+            case "ArrowUp":
+                moveCharacter("up");
+                document.getElementById('step').play();
+                if(!dead){
+                    character.src = "charf.png"
+                }
+                break;
+            case "s":
+            case "S":
+            case "ArrowDown":
+                moveCharacter("down");
+                document.getElementById('step').play();
+                if(!dead){
+                    character.src = "charb.png"
+                }
+                break;
+            case "a":
+            case "A":
+            case "ArrowLeft":
+                moveCharacter("left");
+                document.getElementById('step').play();
+                if(!dead){
+                    character.src = "charl.png"
+                }
+                break;
+            case "d":
+            case "D":
+            case "ArrowRight":
+                moveCharacter("right");
+                document.getElementById('step').play();
+                if(!dead){
+                    character.src = "charr.png"
+                }
+                break;
+        }
+    });
+
+    document.addEventListener("keyup",(event)=>{
+        if(!dead){
+            character.src = "charf.png"
+        }else{
+            character.src = "ghost.png"
+        }
+        
+    });
+</script>
+</body>
+</html>
